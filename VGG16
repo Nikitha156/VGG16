@@ -1,0 +1,28 @@
+import tensorflow as tf
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.models import Model
+
+# Define the number of classes in your dataset
+num_classes = 10  # Replace '10' with the actual number of classes in your dataset
+
+# Load the pre-trained VGG16 model
+base_model = VGG16(weights='imagenet', include_top=False)
+
+# Freeze the layers of the pre-trained model
+for layer in base_model.layers:
+    layer.trainable = False
+
+# Add custom layers for your specific task
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+x = Dense(1024, activation='relu')(x)
+predictions = Dense(num_classes, activation='softmax')(x)  # Use 'num_classes' variable here
+
+# Create a new model by combining the base and custom layers
+model = Model(inputs=base_model.input, outputs=predictions)
+
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Now you can train your model with your dataset using model.fit()
